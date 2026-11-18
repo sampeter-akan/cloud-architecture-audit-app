@@ -1,19 +1,62 @@
 # T-MINUS COUNTDOWN: CLOUD ARCHITECTURE AUDIT
 
-[![Live Deployment](https://img.shields.io/badge/Live_App-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://cloud-architecture-audit-app.vercel.app/)
-[![Architecture](https://img.shields.io/badge/Architecture-Zero--Build_SPA-F59E0B?style=for-the-badge&logo=html5&logoColor=black)](#architecture--technical-highlights)
-[![Timezone Sync](https://img.shields.io/badge/Time_Sync-08:00_UTC_Global-1C2541?style=for-the-badge&logo=clockify&logoColor=white)](#global-multi-timezone-synchronization)
+[![Live Deployment](https://img.shields.io/badge/Live_Demo-Vercel-F59E0B?style=for-the-badge&logo=vercel&logoColor=14161A)](https://cloud-architecture-audit-app.vercel.app/)
+[![GitHub Repo](https://img.shields.io/badge/Source-GitHub-1C2541?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sampeter-akan/cloud-architecture-audit-app)
+[![Architecture](https://img.shields.io/badge/Architecture-Zero--Backend_SPA-10B981?style=for-the-badge)](#system-architecture--data-flow)
 
-An executive-grade, interactive **T-Minus Mission Countdown & Desktop Lock Screen Generator** built to orchestrate the **Cloud Architecture Audit** client deliverable targeting **Wednesday, December 30, 2026 at 08:00:00 UTC**.
+![Cloud Architecture Audit Countdown Lock Screen Preview](./lockscreen-preview.png)
 
-Designed for distributed cloud engineering and governance teams, the application combines real-time multi-timezone telemetry, a business-day backward execution schedule, URL-encoded state sharing, one-click `.ics` calendar provisioning, and a dynamic `1920x1080` desktop lock screen exporter.
+> **Executive Summary:** An interactive **T-Minus Mission Countdown & `1920x1080` Desktop Lock Screen Generator** built to orchestrate the **Cloud Architecture Audit** client deliverable targeting **Wednesday, December 30, 2026 at 08:00:00 UTC**. Designed for distributed cloud engineering and governance teams, it combines real-time multi-timezone telemetry, a business-day backward execution schedule, stateless URL-encoded state sharing, one-click `.ics` calendar provisioning, and an HTML5 Canvas desktop lock screen exporter.
 
 ---
 
 ## Live Production Deployment
 
-* **Production URL:** [https://cloud-architecture-audit-app.vercel.app/](https://cloud-architecture-audit-app.vercel.app/)
-* **Source Repository:** [https://github.com/sampeter-akan/cloud-architecture-audit-app](https://github.com/sampeter-akan/cloud-architecture-audit-app)
+* **Production URL:** <https://cloud-architecture-audit-app.vercel.app/>
+* **Source Repository:** <https://github.com/sampeter-akan/cloud-architecture-audit-app>
+
+---
+
+## System Architecture & Data Flow
+
+Engineered as a **zero-build, zero-backend single-page application (`index.html`)**, the system eliminates server runtime overhead, database latency, and PII exposure while maintaining full multi-device state portability.
+
+```text
++-----------------------------------------------------------------------------------+
+|                        CLIENT RUNTIME (Single-File index.html)                    |
+|                                                                                   |
+|  +-----------------------+     +-----------------------+     +-----------------+  |
+|  |   Telemetry Engine    |     |  Business-Day Engine  |     |  State Manager  |  |
+|  | • 1Hz UTC Ticker      |     | • Mon–Fri Filter      |     | • URL Hash (#s) |  |
+|  | • Intl.DateTimeFormat |     | • Holiday Exclusions  |     | • Query (?done) |  |
+|  |   (UTC/UK/EU/US/WAT)  |     |   (Dec 25 & Dec 28)   |     | • LocalStorage  |  |
+|  +-----------+-----------+     +-----------+-----------+     +--------+--------+  |
+|              |                             |                          |           |
+|              +-----------------------------+--------------------------+           |
+|                                            |                                      |
+|                                            v                                      |
+|              +--------------------------------------------------------+           |
+|              |          Reactive Glassmorphic UI & Renderer           |           |
+|              |  • Frosted Charcoal Card + Weathered Wood Backdrop     |           |
+|              |  • Dynamic Status Badges (COMPLETED / NEXT UP / DUE)   |           |
+|              +------+----------------------+-------------------+------+           |
+|                     |                      |                   |                  |
++---------------------|----------------------|-------------------|------------------+
+                      |                      |                   |
+                      v                      v                   v
+       +-----------------------------+  +----------+  +-----------------------+
+       |  HTML5 Offscreen Canvas     |  | RFC 5545 |  | Standalone Snapshot   |
+       |  • Composites bg + UI card  |  | .ics Gen |  | • Serializes custom   |
+       |  • Exports 1920x1080 PNG    |  | • 08:00Z |  |   milestones into     |
+       |    for OS Lock Screens      |  |   Alarms |  |   downloadable HTML   |
+       +-----------------------------+  +----------+  +-----------------------+
+```
+
+### Architectural Highlights for Technical Reviewers
+* **Zero-Build Portability:** Written in semantic HTML5, Tailwind CSS (CDN), and vanilla ES6+ JavaScript—requiring zero `node_modules`, bundlers, or external API keys.
+* **Stateless URL State Serialization:** Every checkbox toggle or custom milestone edit is Base64-encoded into the URL hash (`#s=`) and query string (`?done=`), enabling instant link sharing across teams without backend storage.
+* **Client-Side Graphics Compositing:** Uses an offscreen `<canvas>` pipeline (`1920x1080`) to merge `background-img.jpg` with live milestone state, typography, and trademark watermarks into a ready-to-apply desktop wallpaper.
+* **Privacy-First Design:** Zero user telemetry, cookies, or personal contact data collected or transmitted.
 
 ---
 
@@ -22,6 +65,7 @@ Designed for distributed cloud engineering and governance teams, the application
 1. **Real-Time T-Minus & Business-Day Telemetry:**
    * Live second-by-second countdown (`Days`, `Hours`, `Minutes`, `Seconds`) synchronized to **December 30, 2026 at 08:00:00 UTC**.
    * **Active Workday Calculator:** Automatically filters out weekends (Saturday/Sunday) and year-end Christmas holiday observances (`Dec 25` and `Dec 28, 2026`) to display true remaining execution days.
+
 2. **Global Multi-Timezone Synchronization (DST-Aware):**
    * Anchored universally at **08:00 UTC** with live conversions across key operational hubs via the browser's `Intl.DateTimeFormat` engine:
      * **UTC (Universal):** `08:00 UTC`
@@ -30,15 +74,13 @@ Designed for distributed cloud engineering and governance teams, the application
      * **US Pacific (PST / PDT):** `00:00 PST`
      * **US Eastern (EST / EDT):** `03:00 EST`
      * **West Africa Time (WAT):** `09:00 WAT`
+
 3. **Interactive 11-Checkpoint Audit Roadmap:**
    * Tracks 11 concise, under-five-word milestones from **T-28** through **T-0** with automatic status indicators (`COMPLETED`, `NEXT UP`, `UPCOMING`, `OVERDUE`), live progress bar calculation, and full CRUD support for adding or editing custom checkpoints.
+
 4. **Distraction-Free Lock Screen Mode & `1920x1080` PNG Exporter:**
    * **Lock Screen Mode (`ESC` to exit):** Hides all configuration toolbars and leaves clean `14vh` headroom at the top for desktop clocks and OS icons.
-   * **HTML5 Canvas PNG Exporter:** Renders a high-resolution `1920x1080` (`16:9`) wallpaper blending the weathered wood plank backdrop (`background-img.jpg`), frosted charcoal executive card, live checkbox states, and footer watermark—ready to apply directly as a Windows/macOS lock screen.
-5. **Stateless URL Sharing & Calendar Provisioning:**
-   * **Shareable State URL:** Serializes checked milestones and custom edits directly into URL parameters (`?done=...#s=...`) so stakeholders see your exact real-time audit progress without requiring a backend database.
-   * **Universal `.ics` Calendar Export:** Generates a multi-event `RFC 5545` iCalendar file (`Cloud-Architecture-Audit-Milestones.ics`) with `08:00 UTC` alarms for instant import into Google Calendar, Outlook, or Apple Calendar.
-   * **Self-Contained HTML Exporter:** Bakes custom milestone updates directly into a downloadable `index.html` snapshot for seamless Git commits.
+   * **HTML5 Canvas PNG Exporter:** Renders a high-resolution `1920x1080` (`16:9`) wallpaper blending the weathered wood plank backdrop (`background-img.jpg`), frosted charcoal executive card, live checkbox states, and footer watermark.
 
 ---
 
@@ -46,7 +88,7 @@ Designed for distributed cloud engineering and governance teams, the application
 
 All milestones are scheduled at **08:00 UTC** on active Monday–Friday business days (excluding December 25 & December 28 public holiday observances):
 
-| Countdown | Scheduled Date | Milestone Deliverable | Status Focus |
+| Countdown | Scheduled Date | Milestone Deliverable | Governance Focus |
 | :--- | :--- | :--- | :--- |
 | **T-28 Days** | Thu, Nov 19, 2026 | Define audit scope and access | Governance & IAM Onboarding |
 | **T-25 Days** | Tue, Nov 24, 2026 | Stakeholder kickoff and discovery | Architecture Baseline Alignment |
@@ -66,18 +108,11 @@ All milestones are scheduled at **08:00 UTC** on active Monday–Friday business
 
 ```text
 cloud-architecture-audit-app/
-├── index.html            # Complete single-file application (UI, telemetry engine, Canvas PNG & ICS exporters)
-├── background-img.jpg    # Full-bleed weathered vertical wood plank background asset (lowercase for Linux/Vercel)
-└── README.md             # Executive documentation and deployment guide
+├── index.html              # Single-file application (UI, telemetry engine, Canvas PNG & ICS exporters)
+├── background-img.jpg      # Full-bleed weathered vertical wood plank background asset
+├── lockscreen-preview.png  # Exported 1920x1080 executive lock screen showcase image
+└── README.md               # Executive documentation and system architecture guide
 ```
-
----
-
-## Architecture & Technical Highlights
-
-* **Zero-Build Single-File Architecture:** Engineered entirely within `index.html` using semantic HTML5, Tailwind CSS (CDN), and vanilla ES6+ JavaScript—requiring zero `node_modules`, bundlers, or server runtime overhead.
-* **Resilient Hybrid Persistence:** Automatically synchronizes state across URL hash encoding (`#s=`), query parameters (`?done=`), and `localStorage` (`tminus_audit_state_v2`) with seamless schema migration.
-* **High-Contrast Frosted Glass UI:** Pairs a textured rustic wood backdrop (`background-img.jpg`) with elevated dark charcoal/espresso glassmorphism (`rgba(20, 22, 26, 0.80)`) and warm executive amber accents (`#F59E0B`).
 
 ---
 
@@ -86,7 +121,7 @@ cloud-architecture-audit-app/
 ### Run Locally
 Because the HTML5 Canvas PNG exporter reads `./background-img.jpg`, serve the directory over a local HTTP server to avoid browser `file://` CORS restrictions:
 
-```powershell
+```bash
 # Using Python 3
 python -m http.server 8080
 # Open http://localhost:8080 in your browser
@@ -95,9 +130,9 @@ python -m http.server 8080
 ### Continuous Deployment (GitHub → Vercel)
 Any push to the `main` branch automatically triggers a zero-config production build on Vercel:
 
-```powershell
-git add README.md
-git commit -m "docs: add executive README.md documentation"
+```bash
+git add README.md lockscreen-preview.png
+git commit -m "docs: add visual lock screen preview and system architecture diagram to README"
 git push origin main
 ```
 
