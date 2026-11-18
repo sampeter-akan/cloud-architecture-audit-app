@@ -6,7 +6,7 @@
 
 ![Cloud Architecture Audit Countdown Lock Screen Preview](./lockscreen-preview.png)
 
-> **Executive Summary:** An interactive **T-Minus Mission Countdown & `1920x1080` Desktop Lock Screen Generator** built to orchestrate the **Cloud Architecture Audit** client deliverable targeting **Wednesday, December 30, 2026 at 08:00:00 UTC**. Designed for distributed cloud engineering and governance teams, it combines real-time multi-timezone telemetry, a business-day backward execution schedule, stateless URL-encoded state sharing, one-click `.ics` calendar provisioning, and an HTML5 Canvas desktop lock screen exporter.
+> **Executive Summary:** An interactive **T-Minus Mission Countdown & `1920x1080` Desktop Lock Screen Generator** built to orchestrate the **Cloud Architecture Audit** client deliverable targeting **Wednesday, December 30, 2026 at 08:00:00 UTC**. Designed for distributed cloud engineering and governance teams, it combines real-time multi-timezone telemetry, an active-workday backward execution schedule, stateless URL-encoded state sharing, one-click `.ics` calendar provisioning, and an HTML5 Canvas desktop lock screen exporter.
 
 ---
 
@@ -26,7 +26,7 @@ Engineered as a **zero-build, zero-backend single-page application (`index.html`
 |                        CLIENT RUNTIME (Single-File index.html)                    |
 |                                                                                   |
 |  +-----------------------+     +-----------------------+     +-----------------+  |
-|  |   Telemetry Engine    |     |  Business-Day Engine  |     |  State Manager  |  |
+|  |   Telemetry Engine    |     |  Active-Workday Eng.  |     |  State Manager  |  |
 |  | • 1Hz UTC Ticker      |     | • Mon–Fri Filter      |     | • URL Hash (#s) |  |
 |  | • Intl.DateTimeFormat |     | • Holiday Exclusions  |     | • Query (?done) |  |
 |  |   (UTC/UK/EU/US/WAT)  |     |   (Dec 25 & Dec 28)   |     | • LocalStorage  |  |
@@ -62,9 +62,9 @@ Engineered as a **zero-build, zero-backend single-page application (`index.html`
 
 ## Executive Capabilities
 
-1. **Real-Time T-Minus & Business-Day Telemetry:**
-   * Live second-by-second countdown (`Days`, `Hours`, `Minutes`, `Seconds`) synchronized to **December 30, 2026 at 08:00:00 UTC**.
-   * **Active Workday Calculator:** Automatically filters out weekends (Saturday/Sunday) and year-end Christmas holiday observances (`Dec 25` and `Dec 28, 2026`) to display true remaining execution days.
+1. **Real-Time T-Minus & Active-Workday Telemetry:**
+   * Live second-by-second countdown (`Calendar Days`, `Hours`, `Minutes`, `Seconds`) synchronized to **December 30, 2026 at 08:00:00 UTC**.
+   * **Active Workday Calculator:** Automatically filters out weekends (Saturday/Sunday) and year-end Christmas holiday observances (`Dec 25` and `Dec 28, 2026`) to display true remaining execution workdays alongside clearly labeled `T-X Workdays` milestones.
 
 2. **Global Multi-Timezone Synchronization (DST-Aware):**
    * Anchored universally at **08:00 UTC** with live conversions across key operational hubs via the browser's `Intl.DateTimeFormat` engine:
@@ -76,7 +76,7 @@ Engineered as a **zero-build, zero-backend single-page application (`index.html`
      * **West Africa Time (WAT):** `09:00 WAT`
 
 3. **Interactive 11-Checkpoint Audit Roadmap:**
-   * Tracks 11 concise, under-five-word milestones from **T-28** through **T-0** with automatic status indicators (`COMPLETED`, `NEXT UP`, `UPCOMING`, `OVERDUE`), live progress bar calculation, and full CRUD support for adding or editing custom checkpoints.
+   * Tracks 11 concise, under-five-word milestones from **T-28 Workdays** through **T-0 Workdays** with automatic status indicators (`COMPLETED`, `NEXT UP`, `UPCOMING`, `OVERDUE`), live progress bar calculation, and full CRUD support for adding or editing custom checkpoints.
 
 4. **Distraction-Free Lock Screen Mode & `1920x1080` PNG Exporter:**
    * **Lock Screen Mode (`ESC` to exit):** Hides all configuration toolbars and leaves clean `14vh` headroom at the top for desktop clocks and OS icons.
@@ -84,23 +84,23 @@ Engineered as a **zero-build, zero-backend single-page application (`index.html`
 
 ---
 
-## Backward T-Minus Execution Schedule
+## Backward T-Minus Execution Schedule (Active Workdays)
 
 All milestones are scheduled at **08:00 UTC** on active Monday–Friday business days (excluding December 25 & December 28 public holiday observances):
 
-| Countdown | Scheduled Date | Milestone Deliverable | Governance Focus |
+| Countdown (Workdays) | Scheduled Date | Milestone Deliverable | Governance Focus |
 | :--- | :--- | :--- | :--- |
-| **T-28 Days** | Thu, Nov 19, 2026 | Define audit scope and access | Governance & IAM Onboarding |
-| **T-25 Days** | Tue, Nov 24, 2026 | Stakeholder kickoff and discovery | Architecture Baseline Alignment |
-| **T-21 Days** | Mon, Nov 30, 2026 | Map cloud topology and IAM | Network & Identity Inventory |
-| **T-18 Days** | Thu, Dec 3, 2026 | Network and workload telemetry check | Observability & Logging Audit |
-| **T-14 Days** | Wed, Dec 9, 2026 | Complete security and cost review | Posture & FinOps Optimization |
-| **T-10 Days** | Tue, Dec 15, 2026 | Validate compliance and risk matrix | Control Mapping & Gap Scoring |
-| **T-7 Days** | Fri, Dec 18, 2026 | Draft architecture findings report | Technical Documentation |
-| **T-5 Days** | Tue, Dec 22, 2026 | Remediation roadmap walkthrough | Prioritized Action Plan |
-| **T-3 Days** | Thu, Dec 24, 2026 | Internal peer review and polish | Quality Assurance Sign-Off |
-| **T-1 Day** | Tue, Dec 29, 2026 | Finalize executive deck and package | Deliverable Packaging |
-| **T-0 Days** | Wed, Dec 30, 2026 | Deliver final audit to client | Final Client Handover |
+| **T-28 Workdays** | Thu, Nov 19, 2026 | Define audit scope and access | Governance & IAM Onboarding |
+| **T-25 Workdays** | Tue, Nov 24, 2026 | Stakeholder kickoff and discovery | Architecture Baseline Alignment |
+| **T-21 Workdays** | Mon, Nov 30, 2026 | Map cloud topology and IAM | Network & Identity Inventory |
+| **T-18 Workdays** | Thu, Dec 3, 2026 | Network and workload telemetry check | Observability & Logging Audit |
+| **T-14 Workdays** | Wed, Dec 9, 2026 | Complete security and cost review | Posture & FinOps Optimization |
+| **T-10 Workdays** | Tue, Dec 15, 2026 | Validate compliance and risk matrix | Control Mapping & Gap Scoring |
+| **T-7 Workdays** | Fri, Dec 18, 2026 | Draft architecture findings report | Technical Documentation |
+| **T-5 Workdays** | Tue, Dec 22, 2026 | Remediation roadmap walkthrough | Prioritized Action Plan |
+| **T-3 Workdays** | Thu, Dec 24, 2026 | Internal peer review and polish | Quality Assurance Sign-Off |
+| **T-1 Workday** | Tue, Dec 29, 2026 | Finalize executive deck and package | Deliverable Packaging |
+| **T-0 Workdays** | Wed, Dec 30, 2026 | Deliver final audit to client | Final Client Handover |
 
 ---
 
@@ -131,8 +131,8 @@ python -m http.server 8080
 Any push to the `main` branch automatically triggers a zero-config production build on Vercel:
 
 ```bash
-git add README.md lockscreen-preview.png
-git commit -m "docs: add visual lock screen preview and system architecture diagram to README"
+git add index.html README.md
+git commit -m "chore: clarify active-workday milestone labels (T-28 Workdays to T-0 Workdays)"
 git push origin main
 ```
 
