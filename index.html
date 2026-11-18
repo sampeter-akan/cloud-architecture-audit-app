@@ -1,0 +1,2290 @@
+<!DOCTYPE html>
+<html lang="en"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxMDQwNDk5MzI2MDM5NDg0NzE0MiIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzY4NzE2YTFiMzQ3M2Y5ZmVfaW5kZXguaHRtbC0yNjUifSwiZXhwIjoxNzk1MDA1ODE4LCJpYXQiOjE3OTUwMDIyMTgsImFsZyI6IlJTMjU2In0.DnVLGKKx38GGQGq7InWGjtVQgH1g9ENwpKtkMqjh9nIw1SuSfxJ-k2--uD7wcjJ8pTMIsYI3dWv4ZGaoDVqsdU70RJoZOfVl-8UOc0zii9Aqms52uSJI__8RcX29RFBGP3szr6xOX5dSdX0Ys_ySMYm_bxNy4R36GiOmhrhFFik9Q8_1RxkSJUU8EVwjgSsLrg6B0-AQwtg9kBK25UI526NhSMwrjujm1JFbrptJDzSGUbdPuw0FKCX_Ow4QOo8VQ7UaMuXHkuHQ00VURYBIx7p5Sw1DgzxMRZSaIJsDGbwFtUWOdg28g-OsWp9W8OR8e6lF6tbpwJQIftMzkXRfFQ","c_68716a1b3473f9fe_index.html-265")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.i=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.extensions="";var l=0,t=null,r=null,q=[],F=new TextEncoder,
+G=new TextDecoder;c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*
+16|0;return(f==="x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;
+(g=t)==null||g.postMessage(a)}};Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  const OVERLAY_SELECTOR =
+    'dialog[open], [role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], [role="combobox"]';
+
+  function isVisibleOverlay(element) {
+    if (element.closest('[hidden], [aria-hidden="true"], [inert]')) {
+      return false;
+    }
+    if (window.getComputedStyle(element).visibility === 'hidden') {
+      return false;
+    }
+    for (let cur = element; cur; cur = cur.parentElement) {
+      if (window.getComputedStyle(cur).display === 'none') {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function hasOpenOverlay() {
+    const candidates = document.querySelectorAll(OVERLAY_SELECTOR);
+    for (let i = 0; i < candidates.length; i++) {
+      if (isVisibleOverlay(candidates[i])) {
+        return true;
+      }
+    }
+    try {
+      if (document.querySelector('[popover]:popover-open')) {
+        return true;
+      }
+    } catch (e) {
+      // Ignore engines that do not support :popover-open.
+    }
+    return false;
+  }
+
+  function isNonEmptySearchInput(target) {
+    return (
+      Boolean(target) &&
+      target.tagName === 'INPUT' &&
+      typeof target.type === 'string' &&
+      target.type.toLowerCase() === 'search' &&
+      typeof target.value === 'string' &&
+      target.value.length > 0
+    );
+  }
+
+  function shouldIgnoreEscape(event) {
+    return (
+      event.key !== 'Escape' ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.isComposing ||
+      event.repeat ||
+      event.keyCode === 229 ||
+      isNonEmptySearchInput(event.target)
+    );
+  }
+
+  let shouldIgnoreCaptureState = false;
+
+  window.addEventListener(
+    'keydown',
+    function(event) {
+      if (event.key === 'Escape') {
+        shouldIgnoreCaptureState =
+          hasOpenOverlay() || isNonEmptySearchInput(event.target);
+      }
+    },
+    {capture: true},
+  );
+
+  window.addEventListener('keydown', function(event) {
+    if (
+      shouldIgnoreEscape(event) ||
+      event.defaultPrevented ||
+      shouldIgnoreCaptureState
+    ) {
+      return;
+    }
+    const wasBlockedOnCapture = shouldIgnoreCaptureState;
+    queueMicrotask(function() {
+      if (event.defaultPrevented || wasBlockedOnCapture) {
+        return;
+      }
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({'type': 'escapeKey'}, '*');
+      }
+    });
+  });
+})();</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>T-MINUS COUNTDOWN: CLOUD ARCHITECTURE AUDIT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            navy: {
+              950: '#060B19',
+              900: '#0B132B',
+              800: '#1C2541',
+              700: '#273459',
+            },
+            amber: {
+              400: '#FBBF24',
+              500: '#F59E0B',
+              600: '#D97706',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Full-Bleed Weathered Wood Plank Background with Graceful Rustic Fallback */
+    body {
+      background-color: #78716c;
+      background-image:
+        url('./background-img.jpg'),
+        repeating-linear-gradient(
+          90deg,
+          #d6d3d1 0px,
+          #e7e5e4 110px,
+          #a8a29e 215px,
+          #57534e 218px,
+          #d6d3d1 222px,
+          #f5f5f4 340px,
+          #78716c 438px,
+          #44403c 442px
+        );
+      background-size: cover, auto;
+      background-position: center center, 0 0;
+      background-attachment: fixed, fixed;
+      background-repeat: no-repeat, repeat;
+      color: #F8FAFC;
+      overflow-x: hidden;
+    }
+
+    /* High-Contrast Dark Charcoal/Espresso Frosted Glass Card Surface */
+    .exec-card {
+      background: linear-gradient(145deg, rgba(20, 22, 26, 0.80), rgba(14, 15, 18, 0.86));
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(245, 158, 11, 0.38);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    /* Custom Checkbox Styling */
+    .milestone-check {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 1.35rem;
+      height: 1.35rem;
+      border-radius: 0.375rem;
+      border: 2px solid #F59E0B;
+      background-color: rgba(15, 17, 21, 0.85);
+      cursor: pointer;
+      display: inline-grid;
+      place-content: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+    }
+
+    .milestone-check:hover {
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.45);
+      transform: scale(1.05);
+    }
+
+    .milestone-check:checked {
+      background-color: #F59E0B;
+      border-color: #F59E0B;
+    }
+
+    .milestone-check:checked::before {
+      content: "";
+      width: 0.7rem;
+      height: 0.7rem;
+      clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+      background-color: #14161A;
+    }
+
+    /* Lock Screen Mode Transitions */
+    .lock-hide {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    body.lock-mode .lock-hide {
+      opacity: 0;
+      pointer-events: none;
+      height: 0;
+      overflow: hidden;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #14161A;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #44403C;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #F59E0B;
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Inter, sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:JetBrains Mono, monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.bottom-0{bottom:0px}.bottom-5{bottom:1.25rem}.left-0{left:0px}.right-0{right:0px}.right-4{right:1rem}.right-5{right:1.25rem}.top-0{top:0px}.top-4{top:1rem}.z-50{z-index:50}.col-span-2{grid-column:span 2 / span 2}.mx-auto{margin-left:auto;margin-right:auto}.my-0\.5{margin-top:0.125rem;margin-bottom:0.125rem}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mb-2{margin-bottom:0.5rem}.mb-2\.5{margin-bottom:0.625rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-7{margin-bottom:1.75rem}.mt-1{margin-top:0.25rem}.mt-2{margin-top:0.5rem}.mt-8{margin-top:2rem}.mt-0\.5{margin-top:0.125rem}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-16{height:4rem}.h-2{height:0.5rem}.h-2\.5{height:0.625rem}.h-3\.5{height:0.875rem}.h-4{height:1rem}.h-full{height:100%}.min-h-screen{min-height:100vh}.w-16{width:4rem}.w-2{width:0.5rem}.w-2\.5{width:0.625rem}.w-3\.5{width:0.875rem}.w-4{width:1rem}.w-full{width:100%}.min-w-0{min-width:0px}.max-w-6xl{max-width:72rem}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.translate-y-24{--tw-translate-y:6rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes ping{75%, 100%{transform:scale(2);opacity:0}}.animate-ping{animation:ping 1s cubic-bezier(0, 0, 0.2, 1) infinite}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-3\.5{gap:0.875rem}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded{border-radius:0.25rem}.rounded-br-2xl{border-bottom-right-radius:1rem}.rounded-tl-2xl{border-top-left-radius:1rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-l-2{border-left-width:2px}.border-r-2{border-right-width:2px}.border-t{border-top-width:1px}.border-t-2{border-top-width:2px}.border-amber-500\/35{border-color:rgb(245 158 11 / 0.35)}.border-amber-500\/40{border-color:rgb(245 158 11 / 0.4)}.border-amber-500\/45{border-color:rgb(245 158 11 / 0.45)}.border-amber-500\/50{border-color:rgb(245 158 11 / 0.5)}.border-amber-500\/70{border-color:rgb(245 158 11 / 0.7)}.border-stone-600\/80{border-color:rgb(87 83 78 / 0.8)}.border-stone-700{--tw-border-opacity:1;border-color:rgb(68 64 60 / var(--tw-border-opacity, 1))}.border-white\/10{border-color:rgb(255 255 255 / 0.1)}.border-white\/15{border-color:rgb(255 255 255 / 0.15)}.border-amber-500\/65{border-color:rgb(245 158 11 / 0.65)}.border-stone-700\/80{border-color:rgb(68 64 60 / 0.8)}.bg-amber-400{--tw-bg-opacity:1;background-color:rgb(251 191 36 / var(--tw-bg-opacity, 1))}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity, 1))}.bg-amber-500\/15{background-color:rgb(245 158 11 / 0.15)}.bg-amber-500\/20{background-color:rgb(245 158 11 / 0.2)}.bg-black\/75{background-color:rgb(0 0 0 / 0.75)}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153 / var(--tw-bg-opacity, 1))}.bg-stone-800\/90{background-color:rgb(41 37 36 / 0.9)}.bg-stone-900{--tw-bg-opacity:1;background-color:rgb(28 25 23 / var(--tw-bg-opacity, 1))}.bg-stone-900\/85{background-color:rgb(28 25 23 / 0.85)}.bg-stone-900\/90{background-color:rgb(28 25 23 / 0.9)}.bg-stone-900\/95{background-color:rgb(28 25 23 / 0.95)}.bg-stone-950{--tw-bg-opacity:1;background-color:rgb(12 10 9 / var(--tw-bg-opacity, 1))}.bg-stone-950\/75{background-color:rgb(12 10 9 / 0.75)}.bg-stone-950\/80{background-color:rgb(12 10 9 / 0.8)}.bg-stone-950\/85{background-color:rgb(12 10 9 / 0.85)}.bg-stone-950\/90{background-color:rgb(12 10 9 / 0.9)}.bg-amber-500\/25{background-color:rgb(245 158 11 / 0.25)}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-amber-600{--tw-gradient-from:#D97706 var(--tw-gradient-from-position);--tw-gradient-to:rgb(217 119 6 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-amber-500{--tw-gradient-to:rgb(245 158 11 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #F59E0B var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-amber-400{--tw-gradient-to:#FBBF24 var(--tw-gradient-to-position)}.p-3{padding:0.75rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-1\.5{padding:0.375rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.pb-2{padding-bottom:0.5rem}.pb-6{padding-bottom:1.5rem}.pb-8{padding-bottom:2rem}.pt-2{padding-top:0.5rem}.pt-6{padding-top:1.5rem}.pt-\[10vh\]{padding-top:10vh}.text-center{text-align:center}.font-mono{font-family:JetBrains Mono, monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[11px\]{font-size:11px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xs{font-size:0.75rem;line-height:1rem}.text-\[10px\]{font-size:10px}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.tracking-\[0\.25em\]{letter-spacing:0.25em}.tracking-tight{letter-spacing:-0.025em}.tracking-wider{letter-spacing:0.05em}.tracking-widest{letter-spacing:0.1em}.text-amber-200\/90{color:rgb(253 230 138 / 0.9)}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.text-rose-400{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity, 1))}.text-slate-100{--tw-text-opacity:1;color:rgb(241 245 249 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-stone-300{--tw-text-opacity:1;color:rgb(214 211 209 / var(--tw-text-opacity, 1))}.text-stone-400{--tw-text-opacity:1;color:rgb(168 162 158 / var(--tw-text-opacity, 1))}.text-stone-950{--tw-text-opacity:1;color:rgb(12 10 9 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-amber-400\/95{color:rgb(251 191 36 / 0.95)}.underline{-webkit-text-decoration-line:underline;text-decoration-line:underline}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.opacity-0{opacity:0}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-amber-500\/20{--tw-shadow-color:rgb(245 158 11 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-amber-500\/10{--tw-shadow-color:rgb(245 158 11 / 0.1);--tw-shadow:var(--tw-shadow-colored)}.drop-shadow{--tw-drop-shadow:drop-shadow(0 1px 2px rgb(0 0 0 / 0.1)) drop-shadow(0 1px 1px rgb(0 0 0 / 0.06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.duration-500{transition-duration:500ms}.selection\:bg-amber-500 *::selection{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity, 1))}.selection\:text-stone-950 *::selection{--tw-text-opacity:1;color:rgb(12 10 9 / var(--tw-text-opacity, 1))}.selection\:bg-amber-500::selection{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity, 1))}.selection\:text-stone-950::selection{--tw-text-opacity:1;color:rgb(12 10 9 / var(--tw-text-opacity, 1))}.hover\:border-white\/25:hover{border-color:rgb(255 255 255 / 0.25)}.hover\:bg-amber-400:hover{--tw-bg-opacity:1;background-color:rgb(251 191 36 / var(--tw-bg-opacity, 1))}.hover\:bg-amber-500\/25:hover{background-color:rgb(245 158 11 / 0.25)}.hover\:bg-amber-500\/30:hover{background-color:rgb(245 158 11 / 0.3)}.hover\:bg-stone-700:hover{--tw-bg-opacity:1;background-color:rgb(68 64 60 / var(--tw-bg-opacity, 1))}.hover\:bg-stone-800:hover{--tw-bg-opacity:1;background-color:rgb(41 37 36 / var(--tw-bg-opacity, 1))}.hover\:bg-stone-900:hover{--tw-bg-opacity:1;background-color:rgb(28 25 23 / var(--tw-bg-opacity, 1))}.hover\:text-amber-300:hover{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.hover\:text-rose-300:hover{--tw-text-opacity:1;color:rgb(253 164 175 / var(--tw-text-opacity, 1))}.hover\:text-amber-400:hover{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.hover\:text-rose-400:hover{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity, 1))}.focus\:border-amber-500:focus{--tw-border-opacity:1;border-color:rgb(245 158 11 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.group:hover .group-hover\:opacity-100{opacity:1}@media (min-width: 640px){.sm\:col-span-1{grid-column:span 1 / span 1}.sm\:flex{display:flex}.sm\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.sm\:grid-cols-5{grid-template-columns:repeat(5, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:gap-4{gap:1rem}.sm\:p-4{padding:1rem}.sm\:p-8{padding:2rem}.sm\:px-8{padding-left:2rem;padding-right:2rem}.sm\:pt-\[14vh\]{padding-top:14vh}.sm\:text-left{text-align:left}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}}@media (min-width: 1024px){.lg\:grid-cols-6{grid-template-columns:repeat(6, minmax(0, 1fr))}.lg\:p-10{padding:2.5rem}.lg\:text-5xl{font-size:3rem;line-height:1}}</style></head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-amber-500 selection:text-stone-950">
+
+  <!-- Toast Notification Banner -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-stone-900/95 border border-amber-500/70 text-slate-100 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-md">
+      <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+      <span id="toast-msg" class="text-sm font-medium">Action completed</span>
+    </div>
+  </div>
+
+  <!-- Floating Exit Lock Screen Mode Button (Visible only in Lock Mode) -->
+  <button id="exit-lock-btn" onclick="toggleLockMode()" class="hidden fixed top-4 right-4 z-50 bg-stone-900/85 hover:bg-stone-800 text-amber-400 border border-amber-500/50 px-3.5 py-1.5 rounded-lg text-xs font-mono tracking-wider uppercase backdrop-blur-md transition shadow-lg">
+    Exit Lock View [ESC]
+  </button>
+
+  <!-- Hidden File Input for Live Background Preview -->
+  <input type="file" id="bg-file-input" accept="image/*" class="hidden" onchange="handleBackgroundUpload(event)">
+
+  <!-- Generous Clean Top Headroom (14vh) for Desktop System Clock & Icons -->
+  <header class="w-full pt-[10vh] sm:pt-[14vh] pb-2 px-4 sm:px-8 max-w-6xl mx-auto">
+    <div class="lock-hide flex flex-wrap items-center justify-between gap-3 mb-4 bg-stone-950/75 backdrop-blur-md border border-white/10 px-4 py-2.5 rounded-2xl shadow-lg">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-mono tracking-wider uppercase">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+        LIVE MISSION TELEMETRY
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="document.getElementById('bg-file-input').click()" class="px-3 py-1.5 rounded-lg bg-stone-800/90 hover:bg-stone-700 border border-stone-600/80 text-xs font-medium text-slate-200 transition flex items-center gap-1.5" title="Test background-img.jpg live in preview">
+          <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          Preview Background Image
+        </button>
+        <button onclick="openSettingsModal()" class="px-3 py-1.5 rounded-lg bg-stone-800/90 hover:bg-stone-700 border border-stone-600/80 text-xs font-medium text-slate-200 transition flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          Configure Mission
+        </button>
+        <button onclick="toggleLockMode()" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-xs font-medium text-amber-300 transition flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+          Lock Screen Mode
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Executive Dashboard Container -->
+  <main class="w-full max-w-6xl mx-auto px-4 sm:px-8 pb-8 flex-1 flex flex-col justify-center">
+    <div class="exec-card rounded-2xl p-5 sm:p-8 lg:p-10 relative overflow-hidden">
+      
+      <!-- Subtle Corner Architectural Accents -->
+      <div class="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-amber-500/50 rounded-tl-2xl pointer-events-none"></div>
+      <div class="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-amber-500/50 rounded-br-2xl pointer-events-none"></div>
+
+      <!-- Title & Target Header -->
+      <div class="text-center border-b border-white/15 pb-6 mb-6">
+        <div class="inline-flex items-center justify-center gap-2 text-amber-400 font-mono text-xs sm:text-sm tracking-[0.25em] uppercase mb-1.5">
+          <span>✦</span>
+          <span>T-MINUS COUNTDOWN</span>
+          <span>✦</span>
+        </div>
+        <h1 id="project-title-display" class="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white uppercase drop-shadow">CLOUD ARCHITECTURE AUDIT</h1>
+        <p id="deadline-subtitle" class="mt-2 text-xs sm:text-sm font-mono text-stone-300">TARGET DEADLINE: WED, DEC 30, 2026 • 08:00:00 UTC</p>
+      </div>
+
+      <!-- Live Ticking Countdown & Business Days Strip -->
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-6">
+        <div class="bg-stone-950/75 border border-white/10 rounded-xl p-3 sm:p-4 text-center">
+          <div id="cd-days" class="font-mono text-2xl sm:text-4xl font-bold text-amber-400">41</div>
+          <div class="text-[11px] font-mono uppercase tracking-widest text-stone-400 mt-1">Days</div>
+        </div>
+        <div class="bg-stone-950/75 border border-white/10 rounded-xl p-3 sm:p-4 text-center">
+          <div id="cd-hours" class="font-mono text-2xl sm:text-4xl font-bold text-white">20</div>
+          <div class="text-[11px] font-mono uppercase tracking-widest text-stone-400 mt-1">Hrs</div>
+        </div>
+        <div class="bg-stone-950/75 border border-white/10 rounded-xl p-3 sm:p-4 text-center">
+          <div id="cd-mins" class="font-mono text-2xl sm:text-4xl font-bold text-white">10</div>
+          <div class="text-[11px] font-mono uppercase tracking-widest text-stone-400 mt-1">Min</div>
+        </div>
+        <div class="bg-stone-950/75 border border-white/10 rounded-xl p-3 sm:p-4 text-center">
+          <div id="cd-secs" class="font-mono text-2xl sm:text-4xl font-bold text-amber-400">22</div>
+          <div class="text-[11px] font-mono uppercase tracking-widest text-stone-400 mt-1">Sec</div>
+        </div>
+        <div class="col-span-2 sm:col-span-1 bg-amber-500/15 border border-amber-500/45 rounded-xl p-3 sm:p-4 text-center flex flex-col justify-center">
+          <div id="cd-workdays" class="font-mono text-2xl sm:text-4xl font-bold text-amber-400">28</div>
+          <div class="text-[11px] font-mono uppercase tracking-widest text-amber-200/90 mt-1">Active Workdays</div>
+        </div>
+      </div>
+
+      <!-- Live Multi-Region World Clock Strip -->
+      <div class="bg-stone-950/80 border border-white/10 rounded-xl p-3.5 mb-7">
+        <div class="flex items-center justify-between text-[11px] font-mono text-stone-400 uppercase tracking-wider mb-2.5 px-1">
+          <span>Global Operations Clock (Live DST-Aware)</span>
+          <span class="text-amber-400">Daily Checkpoint: 08:00 UTC</span>
+        </div>
+        <div id="world-clocks-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+          <div class="bg-stone-900/90 border border-white/10 rounded-lg px-3 py-2 flex flex-col justify-between">
+            <div class="text-[10px] font-mono text-stone-400 truncate">UTC (Universal)</div>
+            <div class="font-mono text-sm sm:text-base font-bold text-slate-100 my-0.5">11:49:37</div>
+            <div class="text-[10px] font-mono text-amber-400/95 truncate">Sync: 08:00 UTC</div>
+          </div>
+        
+          <div class="bg-stone-900/90 border border-white/10 rounded-lg px-3 py-2 flex flex-col justify-between">
+            <div class="text-[10px] font-mono text-stone-400 truncate">UK (GMT / BST)</div>
+            <div class="font-mono text-sm sm:text-base font-bold text-slate-100 my-0.5">11:49:37</div>
+            <div class="text-[10px] font-mono text-amber-400/95 truncate">Sync: 08:00 GMT / 09:00 BST</div>
+          </div>
+        
+          <div class="bg-stone-900/90 border border-white/10 rounded-lg px-3 py-2 flex flex-col justify-between">
+            <div class="text-[10px] font-mono text-stone-400 truncate">EU (CET / CEST)</div>
+            <div class="font-mono text-sm sm:text-base font-bold text-slate-100 my-0.5">12:49:37</div>
+            <div class="text-[10px] font-mono text-amber-400/95 truncate">Sync: 09:00 CET</div>
+          </div>
+        
+          <div class="bg-stone-900/90 border border-white/10 rounded-lg px-3 py-2 flex flex-col justify-between">
+            <div class="text-[10px] font-mono text-stone-400 truncate">US Pacific (PST)</div>
+            <div class="font-mono text-sm sm:text-base font-bold text-slate-100 my-0.5">03:49:37</div>
+            <div class="text-[10px] font-mono text-amber-400/95 truncate">Sync: 00:00 PST</div>
+          </div>
+        
+          <div class="bg-stone-900/90 border border-white/10 rounded-lg px-3 py-2 flex flex-col justify-between">
+            <div class="text-[10px] font-mono text-stone-400 truncate">US Eastern (EST)</div>
+            <div class="font-mono text-sm sm:text-base font-bold text-slate-100 my-0.5">06:49:37</div>
+            <div class="text-[10px] font-mono text-amber-400/95 truncate">Sync: 03:00 EST</div>
+          </div>
+        
+          <div class="bg-stone-900/90 border border-white/10 rounded-lg px-3 py-2 flex flex-col justify-between">
+            <div class="text-[10px] font-mono text-stone-400 truncate">West Africa (WAT)</div>
+            <div class="font-mono text-sm sm:text-base font-bold text-slate-100 my-0.5">12:49:37</div>
+            <div class="text-[10px] font-mono text-amber-400/95 truncate">Sync: 09:00 WAT</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Milestone Progress Bar & Header -->
+      <div class="mb-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2.5">
+            <h2 class="text-sm sm:text-base font-bold uppercase tracking-wider text-slate-100">
+              Execution Milestones
+            </h2>
+            <span id="completion-badge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40">0 / 11 Complete (0%)</span>
+          </div>
+          <button onclick="openAddMilestoneModal()" class="lock-hide text-xs font-mono text-amber-400 hover:text-amber-300 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 transition">
+            <span>+ Add / Edit Custom Milestones</span>
+          </button>
+        </div>
+        <div class="w-full h-2 bg-stone-950/90 rounded-full overflow-hidden border border-white/10">
+          <div id="progress-bar" class="h-full bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400 transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Interactive T-Minus Milestone Checklist -->
+      <div id="milestones-list" class="space-y-2.5">
+          <div class="group flex items-center justify-between gap-3 p-3.5 rounded-xl transition border bg-stone-900/90 border-amber-500/65 shadow-lg shadow-amber-500/10">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <input type="checkbox" onchange="toggleMilestone('m1')" class="milestone-check" aria-label="Toggle Define audit scope and access">
+              
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono text-xs sm:text-sm font-bold text-amber-400">T-28 Days</span>
+                  <span class="font-mono text-xs text-stone-300">(Thu, Nov 19, 2026)</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-900 text-stone-300 border border-stone-700/80">TOMORROW</span>
+                </div>
+                <div class="text-sm sm:text-base font-medium mt-0.5 truncate text-slate-100">
+                  Define audit scope and access
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-500/25 text-amber-300 border border-amber-500/50 animate-pulse">NEXT UP</span>
+              <div class="lock-hide hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button onclick="openEditMilestoneModal('m1')" title="Edit Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-amber-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+                <button onclick="deleteMilestone('m1')" title="Remove Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="group flex items-center justify-between gap-3 p-3.5 rounded-xl transition border bg-stone-950/75 border-white/10 hover:border-white/25">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <input type="checkbox" onchange="toggleMilestone('m2')" class="milestone-check" aria-label="Toggle Stakeholder kickoff and discovery">
+              
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono text-xs sm:text-sm font-bold text-amber-400">T-25 Days</span>
+                  <span class="font-mono text-xs text-stone-300">(Tue, Nov 24, 2026)</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-900 text-stone-300 border border-stone-700/80">IN 6D</span>
+                </div>
+                <div class="text-sm sm:text-base font-medium mt-0.5 truncate text-slate-100">
+                  Stakeholder kickoff and discovery
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-stone-800/90 text-stone-300 border border-stone-700">UPCOMING</span>
+              <div class="lock-hide hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button onclick="openEditMilestoneModal('m2')" title="Edit Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-amber-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+                <button onclick="deleteMilestone('m2')" title="Remove Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="group flex items-center justify-between gap-3 p-3.5 rounded-xl transition border bg-stone-950/75 border-white/10 hover:border-white/25">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <input type="checkbox" onchange="toggleMilestone('m3')" class="milestone-check" aria-label="Toggle Map cloud topology and IAM">
+              
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono text-xs sm:text-sm font-bold text-amber-400">T-21 Days</span>
+                  <span class="font-mono text-xs text-stone-300">(Mon, Nov 30, 2026)</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-900 text-stone-300 border border-stone-700/80">IN 12D</span>
+                </div>
+                <div class="text-sm sm:text-base font-medium mt-0.5 truncate text-slate-100">
+                  Map cloud topology and IAM
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-stone-800/90 text-stone-300 border border-stone-700">UPCOMING</span>
+              <div class="lock-hide hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button onclick="openEditMilestoneModal('m3')" title="Edit Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-amber-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+                <button onclick="deleteMilestone('m3')" title="Remove Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="group flex items-center justify-between gap-3 p-3.5 rounded-xl transition border bg-stone-950/75 border-white/10 hover:border-white/25">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <input type="checkbox" onchange="toggleMilestone('m4')" class="milestone-check" aria-label="Toggle Network and workload telemetry check">
+              
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono text-xs sm:text-sm font-bold text-amber-400">T-18 Days</span>
+                  <span class="font-mono text-xs text-stone-300">(Thu, Dec 3, 2026)</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-900 text-stone-300 border border-stone-700/80">IN 15D</span>
+                </div>
+                <div class="text-sm sm:text-base font-medium mt-0.5 truncate text-slate-100">
+                  Network and workload telemetry check
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-stone-800/90 text-stone-300 border border-stone-700">UPCOMING</span>
+              <div class="lock-hide hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button onclick="openEditMilestoneModal('m4')" title="Edit Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-amber-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+                <button onclick="deleteMilestone('m4')" title="Remove Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="group flex items-center justify-between gap-3 p-3.5 rounded-xl transition border bg-stone-950/75 border-white/10 hover:border-white/25">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <input type="checkbox" onchange="toggleMilestone('m5')" class="milestone-check" aria-label="Toggle Complete security and cost review">
+              
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono text-xs sm:text-sm font-bold text-amber-400">T-14 Days</span>
+                  <span class="font-mono text-xs text-stone-300">(Wed, Dec 9, 2026)</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-900 text-stone-300 border border-stone-700/80">IN 21D</span>
+                </div>
+                <div class="text-sm sm:text-base font-medium mt-0.5 truncate text-slate-100">
+                  Complete security and cost review
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-stone-800/90 text-stone-300 border border-stone-700">UPCOMING</span>
+              <div class="lock-hide hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button onclick="openEditMilestoneModal('m5')" title="Edit Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-amber-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+                <button onclick="deleteMilestone('m5')" title="Remove Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="group flex items-center justify-between gap-3 p-3.5 rounded-xl transition border bg-stone-950/75 border-white/10 hover:border-white/25">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <input type="checkbox" onchange="toggleMilestone('m6')" class="milestone-check" aria-label="Toggle Validate compliance and risk matrix">
+              
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono text-xs sm:text-sm font-bold text-amber-400">T-10 Days</span>
+                  <span class="font-mono text-xs text-stone-300">(Tue, Dec 15, 2026)</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-900 text-stone-300 border border-stone-700/80">IN 27D</span>
+                </div>
+                <div class="text-sm sm:text-base font-medium mt-0.5 truncate text-slate-100">
+                  Validate compliance and risk matrix
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-stone-800/90 text-stone-300 border border-stone-700">UPCOMING</span>
+              <div class="lock-hide hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button onclick="openEditMilestoneModal('m6')" title="Edit Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-amber-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+                <button onclick="deleteMilestone('m6')" title="Remove Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="group flex items-center justify-between gap-3 p-3.5 rounded-xl transition border bg-stone-950/75 border-white/10 hover:border-white/25">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <input type="checkbox" onchange="toggleMilestone('m7')" class="milestone-check" aria-label="Toggle Draft architecture findings report">
+              
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono text-xs sm:text-sm font-bold text-amber-400">T-7 Days</span>
+                  <span class="font-mono text-xs text-stone-300">(Fri, Dec 18, 2026)</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-900 text-stone-300 border border-stone-700/80">IN 30D</span>
+                </div>
+                <div class="text-sm sm:text-base font-medium mt-0.5 truncate text-slate-100">
+                  Draft architecture findings report
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-stone-800/90 text-stone-300 border border-stone-700">UPCOMING</span>
+              <div class="lock-hide hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button onclick="openEditMilestoneModal('m7')" title="Edit Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-amber-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+                <button onclick="deleteMilestone('m7')" title="Remove Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="group flex items-center justify-between gap-3 p-3.5 rounded-xl transition border bg-stone-950/75 border-white/10 hover:border-white/25">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <input type="checkbox" onchange="toggleMilestone('m8')" class="milestone-check" aria-label="Toggle Remediation roadmap walkthrough">
+              
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono text-xs sm:text-sm font-bold text-amber-400">T-5 Days</span>
+                  <span class="font-mono text-xs text-stone-300">(Tue, Dec 22, 2026)</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-900 text-stone-300 border border-stone-700/80">IN 34D</span>
+                </div>
+                <div class="text-sm sm:text-base font-medium mt-0.5 truncate text-slate-100">
+                  Remediation roadmap walkthrough
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-stone-800/90 text-stone-300 border border-stone-700">UPCOMING</span>
+              <div class="lock-hide hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button onclick="openEditMilestoneModal('m8')" title="Edit Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-amber-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+                <button onclick="deleteMilestone('m8')" title="Remove Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="group flex items-center justify-between gap-3 p-3.5 rounded-xl transition border bg-stone-950/75 border-white/10 hover:border-white/25">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <input type="checkbox" onchange="toggleMilestone('m9')" class="milestone-check" aria-label="Toggle Internal peer review and polish">
+              
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono text-xs sm:text-sm font-bold text-amber-400">T-3 Days</span>
+                  <span class="font-mono text-xs text-stone-300">(Thu, Dec 24, 2026)</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-900 text-stone-300 border border-stone-700/80">IN 36D</span>
+                </div>
+                <div class="text-sm sm:text-base font-medium mt-0.5 truncate text-slate-100">
+                  Internal peer review and polish
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-stone-800/90 text-stone-300 border border-stone-700">UPCOMING</span>
+              <div class="lock-hide hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button onclick="openEditMilestoneModal('m9')" title="Edit Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-amber-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+                <button onclick="deleteMilestone('m9')" title="Remove Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="group flex items-center justify-between gap-3 p-3.5 rounded-xl transition border bg-stone-950/75 border-white/10 hover:border-white/25">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <input type="checkbox" onchange="toggleMilestone('m10')" class="milestone-check" aria-label="Toggle Finalize executive deck and package">
+              
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono text-xs sm:text-sm font-bold text-amber-400">T-1 Day</span>
+                  <span class="font-mono text-xs text-stone-300">(Tue, Dec 29, 2026)</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-900 text-stone-300 border border-stone-700/80">IN 41D</span>
+                </div>
+                <div class="text-sm sm:text-base font-medium mt-0.5 truncate text-slate-100">
+                  Finalize executive deck and package
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-stone-800/90 text-stone-300 border border-stone-700">UPCOMING</span>
+              <div class="lock-hide hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button onclick="openEditMilestoneModal('m10')" title="Edit Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-amber-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+                <button onclick="deleteMilestone('m10')" title="Remove Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="group flex items-center justify-between gap-3 p-3.5 rounded-xl transition border bg-stone-950/75 border-white/10 hover:border-white/25">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <input type="checkbox" onchange="toggleMilestone('m11')" class="milestone-check" aria-label="Toggle Deliver final audit to client">
+              
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono text-xs sm:text-sm font-bold text-amber-400">T-0 Days</span>
+                  <span class="font-mono text-xs text-stone-300">(Wed, Dec 30, 2026)</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-900 text-stone-300 border border-stone-700/80">IN 42D</span>
+                </div>
+                <div class="text-sm sm:text-base font-medium mt-0.5 truncate text-slate-100">
+                  Deliver final audit to client
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-stone-800/90 text-stone-300 border border-stone-700">UPCOMING</span>
+              <div class="lock-hide hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button onclick="openEditMilestoneModal('m11')" title="Edit Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-amber-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+                <button onclick="deleteMilestone('m11')" title="Remove Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <!-- Action & Export Toolbar -->
+      <div class="lock-hide mt-8 pt-6 border-t border-white/15 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button onclick="exportLockScreenPNG()" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold text-xs sm:text-sm transition shadow-lg shadow-amber-500/20 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            Export 1920x1080 Lock Screen PNG
+          </button>
+
+          <button onclick="copyShareableURL()" class="px-4 py-2.5 rounded-xl bg-stone-900/90 hover:bg-stone-800 border border-amber-500/45 text-amber-300 font-medium text-xs sm:text-sm transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+            Copy Shareable State URL
+          </button>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button onclick="downloadICS()" class="px-3.5 py-2.5 rounded-xl bg-stone-950/85 hover:bg-stone-900 border border-white/15 text-slate-200 font-medium text-xs sm:text-sm transition flex items-center gap-2">
+            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            Download .ics Calendar
+          </button>
+
+          <button onclick="downloadStandaloneHTML()" class="px-3.5 py-2.5 rounded-xl bg-stone-950/85 hover:bg-stone-900 border border-white/15 text-slate-200 font-medium text-xs sm:text-sm transition flex items-center gap-2">
+            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Download index.html
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Executive Copyright & Trademark Footer -->
+  <footer class="w-full max-w-6xl mx-auto px-4 sm:px-8 pb-6">
+    <div class="bg-stone-950/80 backdrop-blur-md border border-white/10 rounded-2xl px-5 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-mono text-stone-300 shadow-lg">
+      <div class="text-center sm:text-left">
+        © 2026 <span class="text-amber-400 font-semibold">Samuel Peter™</span> • Cloud Architecture Audit Countdown. All Rights Reserved.
+      </div>
+      <a href="https://cloud-architecture-audit-app.vercel.app/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 transition">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>cloud-architecture-audit-app.vercel.app</span>
+      </a>
+    </div>
+  </footer>
+
+  <!-- Modal: Add / Edit Milestone -->
+  <div id="milestone-modal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="exec-card w-full max-w-md rounded-2xl p-6">
+      <h3 id="modal-title" class="text-lg font-bold text-white mb-4">Add Custom Milestone</h3>
+      <form id="milestone-form" onsubmit="saveMilestone(event)" class="space-y-4">
+        <input type="hidden" id="edit-milestone-id">
+        <div>
+          <label class="block text-xs font-mono uppercase text-stone-400 mb-1">T-Minus Label (e.g., T-10 Days)</label>
+          <input type="text" id="ms-label" required="" placeholder="T-10 Days" class="w-full px-3.5 py-2 rounded-lg bg-stone-950 border border-stone-700 text-white text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-mono uppercase text-stone-400 mb-1">Scheduled Date (UTC)</label>
+          <input type="date" id="ms-date" required="" class="w-full px-3.5 py-2 rounded-lg bg-stone-950 border border-stone-700 text-white text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-mono uppercase text-stone-400 mb-1">Milestone Deliverable (Keep Concise)</label>
+          <input type="text" id="ms-text" required="" placeholder="Validate IAM privilege boundaries" class="w-full px-3.5 py-2 rounded-lg bg-stone-950 border border-stone-700 text-white text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div class="flex justify-end gap-2.5 pt-2">
+          <button type="button" onclick="closeModals()" class="px-4 py-2 rounded-lg bg-stone-900 text-slate-300 text-sm hover:bg-stone-800">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-amber-500 text-stone-950 font-semibold text-sm hover:bg-amber-400">Save Milestone</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Configure Mission Title & Deadline -->
+  <div id="settings-modal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="exec-card w-full max-w-md rounded-2xl p-6">
+      <h3 class="text-lg font-bold text-white mb-4">Configure Mission Parameters</h3>
+      <form onsubmit="saveMissionSettings(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-mono uppercase text-stone-400 mb-1">Mission / Deliverable Title</label>
+          <input type="text" id="cfg-title" required="" class="w-full px-3.5 py-2 rounded-lg bg-stone-950 border border-stone-700 text-white text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-mono uppercase text-stone-400 mb-1">Target Deadline (UTC Date &amp; Time)</label>
+          <input type="datetime-local" id="cfg-deadline" required="" class="w-full px-3.5 py-2 rounded-lg bg-stone-950 border border-stone-700 text-white text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div class="flex items-center justify-between pt-2">
+          <button type="button" onclick="resetToDefaults()" class="text-xs font-mono text-rose-400 hover:text-rose-300 underline">Reset Default Audit Plan</button>
+          <div class="flex gap-2">
+            <button type="button" onclick="closeModals()" class="px-4 py-2 rounded-lg bg-stone-900 text-slate-300 text-sm hover:bg-stone-800">Cancel</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-amber-500 text-stone-950 font-semibold text-sm hover:bg-amber-400">Apply</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Offscreen High-Res 1920x1080 Canvas for Lock Screen PNG Export -->
+  <canvas id="export-canvas" width="1920" height="1080" class="hidden"></canvas>
+
+  <script>
+    /**
+     * DEFAULT MISSION CONFIGURATION
+     * Target: Dec 30, 2026 at 08:00:00 UTC
+     * Active Business Days: Monday–Friday, excluding Dec 25 & Dec 28 public holidays
+     * Expanded 11-Checkpoint Executive Audit Plan
+     */
+    const DEFAULT_STATE = {
+  "schemaVersion": 2,
+  "title": "CLOUD ARCHITECTURE AUDIT",
+  "deadlineUTC": "2026-12-30T08:00:00Z",
+  "milestones": [
+    {
+      "id": "m1",
+      "label": "T-28 Days",
+      "date": "2026-11-19",
+      "text": "Define audit scope and access",
+      "done": false
+    },
+    {
+      "id": "m2",
+      "label": "T-25 Days",
+      "date": "2026-11-24",
+      "text": "Stakeholder kickoff and discovery",
+      "done": false
+    },
+    {
+      "id": "m3",
+      "label": "T-21 Days",
+      "date": "2026-11-30",
+      "text": "Map cloud topology and IAM",
+      "done": false
+    },
+    {
+      "id": "m4",
+      "label": "T-18 Days",
+      "date": "2026-12-03",
+      "text": "Network and workload telemetry check",
+      "done": false
+    },
+    {
+      "id": "m5",
+      "label": "T-14 Days",
+      "date": "2026-12-09",
+      "text": "Complete security and cost review",
+      "done": false
+    },
+    {
+      "id": "m6",
+      "label": "T-10 Days",
+      "date": "2026-12-15",
+      "text": "Validate compliance and risk matrix",
+      "done": false
+    },
+    {
+      "id": "m7",
+      "label": "T-7 Days",
+      "date": "2026-12-18",
+      "text": "Draft architecture findings report",
+      "done": false
+    },
+    {
+      "id": "m8",
+      "label": "T-5 Days",
+      "date": "2026-12-22",
+      "text": "Remediation roadmap walkthrough",
+      "done": false
+    },
+    {
+      "id": "m9",
+      "label": "T-3 Days",
+      "date": "2026-12-24",
+      "text": "Internal peer review and polish",
+      "done": false
+    },
+    {
+      "id": "m10",
+      "label": "T-1 Day",
+      "date": "2026-12-29",
+      "text": "Finalize executive deck and package",
+      "done": false
+    },
+    {
+      "id": "m11",
+      "label": "T-0 Days",
+      "date": "2026-12-30",
+      "text": "Deliver final audit to client",
+      "done": false
+    }
+  ]
+};
+
+    // Global Holiday Exclusions (YYYY-MM-DD)
+    const HOLIDAYS = new Set(["2026-12-25", "2026-12-28"]);
+
+    // World Clock Regions & 08:00 UTC Checkpoint Equivalents
+    const WORLD_REGIONS = [
+      { id: "utc", name: "UTC (Universal)", tz: "UTC", checkpoint: "08:00 UTC" },
+      { id: "uk",  name: "UK (GMT / BST)", tz: "Europe/London", checkpoint: "08:00 GMT / 09:00 BST" },
+      { id: "eu",  name: "EU (CET / CEST)", tz: "Europe/Berlin", checkpoint: "09:00 CET" },
+      { id: "pst", name: "US Pacific (PST)", tz: "America/Los_Angeles", checkpoint: "00:00 PST" },
+      { id: "est", name: "US Eastern (EST)", tz: "America/New_York", checkpoint: "03:00 EST" },
+      { id: "wat", name: "West Africa (WAT)", tz: "Africa/Lagos", checkpoint: "09:00 WAT" }
+    ];
+
+    let appState = loadInitialState();
+    let customBgDataURL = null;
+
+    /**
+     * Allow live previewing of background-img.jpg before pushing to GitHub
+     */
+    function handleBackgroundUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        customBgDataURL = e.target.result;
+        document.body.style.backgroundImage = `url('${customBgDataURL}')`;
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundPosition = "center center";
+        document.body.style.backgroundAttachment = "fixed";
+        showToast(`Loaded "${file.name}" as live background!`);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /**
+     * Load state from URL query (?done=m1,m2 or #s=...) first, then localStorage, then default.
+     * Automatically upgrades legacy v1 (7-item) localStorage states to v2 (11-item) while preserving completed items.
+     */
+    function loadInitialState() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const encoded = params.get("s") || (window.location.hash.startsWith("#s=") ? window.location.hash.slice(3) : null);
+        if (encoded) {
+          const decoded = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+          if (decoded && decoded.title && Array.isArray(decoded.milestones)) {
+            localStorage.setItem("tminus_audit_state_v2", JSON.stringify(decoded));
+            return decoded;
+          }
+        }
+        const doneParam = params.get("done");
+        if (doneParam !== null) {
+          const doneIds = new Set(doneParam.split(",").filter(Boolean));
+          const stateFromDone = JSON.parse(JSON.stringify(DEFAULT_STATE));
+          stateFromDone.milestones.forEach(m => { m.done = doneIds.has(m.id); });
+          return stateFromDone;
+        }
+      } catch (e) {
+        console.warn("Could not parse shared URL state:", e);
+      }
+
+      try {
+        const savedV2 = localStorage.getItem("tminus_audit_state_v2");
+        if (savedV2) {
+          return JSON.parse(savedV2);
+        }
+        // Migrate any checked items from v1 storage onto the new 11-milestone roadmap
+        const savedV1 = localStorage.getItem("tminus_audit_state_v1");
+        if (savedV1) {
+          const parsedV1 = JSON.parse(savedV1);
+          const completedTexts = new Set(
+            (parsedV1.milestones || []).filter(m => m.done).map(m => m.text.toLowerCase())
+          );
+          const migrated = JSON.parse(JSON.stringify(DEFAULT_STATE));
+          if (parsedV1.title) migrated.title = parsedV1.title;
+          if (parsedV1.deadlineUTC) migrated.deadlineUTC = parsedV1.deadlineUTC;
+          migrated.milestones.forEach(m => {
+            if (completedTexts.has(m.text.toLowerCase())) m.done = true;
+          });
+          localStorage.setItem("tminus_audit_state_v2", JSON.stringify(migrated));
+          return migrated;
+        }
+      } catch (e) {
+        console.warn("LocalStorage unavailable:", e);
+      }
+
+      return JSON.parse(JSON.stringify(DEFAULT_STATE));
+    }
+
+    function persistState() {
+      try {
+        localStorage.setItem("tminus_audit_state_v2", JSON.stringify(appState));
+      } catch (e) {
+        console.warn("Could not save to localStorage:", e);
+      }
+      // Update URL with both ?done= and #s= so shared links preserve exact custom milestones & progress
+      try {
+        const doneIds = appState.milestones.filter(m => m.done).map(m => m.id).join(",");
+        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(appState))));
+        const url = new URL(window.location.href);
+        url.searchParams.set("done", doneIds);
+        url.hash = "s=" + encoded;
+        window.history.replaceState(null, "", url.toString());
+      } catch (e) {}
+    }
+
+    /**
+     * Calculate active business days between now and deadline (excluding Sat/Sun & Dec 25/28)
+     */
+    function countBusinessDays(startDate, endDate) {
+      if (endDate <= startDate) return 0;
+      let count = 0;
+      const cur = new Date(Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), startDate.getUTCDate()));
+      const end = new Date(Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth(), endDate.getUTCDate()));
+      
+      while (cur < end) {
+        cur.setUTCDate(cur.getUTCDate() + 1);
+        const day = cur.getUTCDay();
+        const iso = cur.toISOString().slice(0, 10);
+        if (day !== 0 && day !== 6 && !HOLIDAYS.has(iso)) {
+          count++;
+        }
+      }
+      return count;
+    }
+
+    /**
+     * Format date string (YYYY-MM-DD) to readable executive format (e.g., Thu, Nov 19, 2026)
+     */
+    function formatExecDate(isoDateStr) {
+      const [y, m, d] = isoDateStr.split("-").map(Number);
+      const dt = new Date(Date.UTC(y, m - 1, d));
+      return dt.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC"
+      });
+    }
+
+    /**
+     * Live Tick Engine: Updates Countdown Digits & Global World Clocks every second
+     */
+    function updateLiveTelemetry() {
+      const now = new Date();
+      const target = new Date(appState.deadlineUTC);
+      const diffMs = target - now;
+
+      if (diffMs <= 0) {
+        document.getElementById("cd-days").textContent = "00";
+        document.getElementById("cd-hours").textContent = "00";
+        document.getElementById("cd-mins").textContent = "00";
+        document.getElementById("cd-secs").textContent = "00";
+        document.getElementById("cd-workdays").textContent = "00";
+      } else {
+        const totalSecs = Math.floor(diffMs / 1000);
+        const days = Math.floor(totalSecs / 86400);
+        const hours = Math.floor((totalSecs % 86400) / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        const secs = totalSecs % 60;
+        const workdays = countBusinessDays(now, target);
+
+        document.getElementById("cd-days").textContent = String(days).padStart(2, "0");
+        document.getElementById("cd-hours").textContent = String(hours).padStart(2, "0");
+        document.getElementById("cd-mins").textContent = String(mins).padStart(2, "0");
+        document.getElementById("cd-secs").textContent = String(secs).padStart(2, "0");
+        document.getElementById("cd-workdays").textContent = String(workdays).padStart(2, "0");
+      }
+
+      // Update Multi-Region Clocks
+      const clockContainer = document.getElementById("world-clocks-grid");
+      clockContainer.innerHTML = WORLD_REGIONS.map(region => {
+        const timeStr = now.toLocaleTimeString("en-GB", {
+          timeZone: region.tz,
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false
+        });
+        return `
+          <div class="bg-stone-900/90 border border-white/10 rounded-lg px-3 py-2 flex flex-col justify-between">
+            <div class="text-[10px] font-mono text-stone-400 truncate">${region.name}</div>
+            <div class="font-mono text-sm sm:text-base font-bold text-slate-100 my-0.5">${timeStr}</div>
+            <div class="text-[10px] font-mono text-amber-400/95 truncate">Sync: ${region.checkpoint}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    /**
+     * Render Header, Progress Bar, and Interactive Milestone Checklist
+     */
+    function renderDashboard() {
+      document.getElementById("project-title-display").textContent = appState.title;
+      const targetDt = new Date(appState.deadlineUTC);
+      const formattedTarget = targetDt.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC"
+      }).toUpperCase();
+      const formattedTime = targetDt.toISOString().slice(11, 19);
+      document.getElementById("deadline-subtitle").textContent = `TARGET DEADLINE: ${formattedTarget} • ${formattedTime} UTC`;
+
+      // Sort milestones chronologically
+      appState.milestones.sort((a, b) => a.date.localeCompare(b.date));
+
+      const total = appState.milestones.length;
+      const completed = appState.milestones.filter(m => m.done).length;
+      const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+      document.getElementById("completion-badge").textContent = `${completed} / ${total} Complete (${pct}%)`;
+      document.getElementById("progress-bar").style.width = `${pct}%`;
+
+      const now = new Date();
+      const todayISO = now.toISOString().slice(0, 10);
+      let nextUpAssigned = false;
+
+      const listEl = document.getElementById("milestones-list");
+      listEl.innerHTML = appState.milestones.map((ms) => {
+        // Compute relative days from today
+        const msDateObj = new Date(ms.date + "T08:00:00Z");
+        const todayObj = new Date(todayISO + "T08:00:00Z");
+        const diffDays = Math.round((msDateObj - todayObj) / 86400000);
+
+        let relativeLabel = "";
+        if (diffDays === 0) relativeLabel = "TODAY";
+        else if (diffDays === 1) relativeLabel = "TOMORROW";
+        else if (diffDays > 1) relativeLabel = `IN ${diffDays}D`;
+        else relativeLabel = `${Math.abs(diffDays)}D AGO`;
+
+        // Determine status badge
+        let badgeHTML = "";
+        if (ms.done) {
+          badgeHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/35">COMPLETED</span>`;
+        } else if (diffDays < 0) {
+          badgeHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/35">OVERDUE</span>`;
+        } else if (!nextUpAssigned) {
+          nextUpAssigned = true;
+          badgeHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-500/25 text-amber-300 border border-amber-500/50 animate-pulse">NEXT UP</span>`;
+        } else {
+          badgeHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-stone-800/90 text-stone-300 border border-stone-700">UPCOMING</span>`;
+        }
+
+        const isHighlighted = !ms.done && badgeHTML.includes("NEXT UP");
+
+        return `
+          <div class="group flex items-center justify-between gap-3 p-3.5 rounded-xl transition border ${
+            ms.done 
+              ? "bg-stone-950/65 border-white/10 opacity-75" 
+              : isHighlighted 
+                ? "bg-stone-900/90 border-amber-500/65 shadow-lg shadow-amber-500/10" 
+                : "bg-stone-950/75 border-white/10 hover:border-white/25"
+          }">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <input type="checkbox" ${ms.done ? "checked" : ""} onchange="toggleMilestone('${ms.id}')" class="milestone-check" aria-label="Toggle ${ms.text}" />
+              
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono text-xs sm:text-sm font-bold text-amber-400">${escapeHTML(ms.label)}</span>
+                  <span class="font-mono text-xs text-stone-300">(${formatExecDate(ms.date)})</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-900 text-stone-300 border border-stone-700/80">${relativeLabel}</span>
+                </div>
+                <div class="text-sm sm:text-base font-medium mt-0.5 truncate ${ms.done ? "line-through text-stone-400" : "text-slate-100"}">
+                  ${escapeHTML(ms.text)}
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              ${badgeHTML}
+              <div class="lock-hide hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button onclick="openEditMilestoneModal('${ms.id}')" title="Edit Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-amber-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+                <button onclick="deleteMilestone('${ms.id}')" title="Remove Milestone" class="p-1.5 rounded-lg hover:bg-stone-800 text-stone-400 hover:text-rose-400 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function toggleMilestone(id) {
+      const ms = appState.milestones.find(m => m.id === id);
+      if (ms) {
+        ms.done = !ms.done;
+        persistState();
+        renderDashboard();
+        showToast(ms.done ? `Completed: ${ms.label}` : `Reopened: ${ms.label}`);
+      }
+    }
+
+    function openAddMilestoneModal() {
+      document.getElementById("modal-title").textContent = "Add Custom Milestone";
+      document.getElementById("edit-milestone-id").value = "";
+      document.getElementById("ms-label").value = "";
+      document.getElementById("ms-date").value = "2026-12-15";
+      document.getElementById("ms-text").value = "";
+      document.getElementById("milestone-modal").classList.remove("hidden");
+    }
+
+    function openEditMilestoneModal(id) {
+      const ms = appState.milestones.find(m => m.id === id);
+      if (!ms) return;
+      document.getElementById("modal-title").textContent = "Edit Milestone";
+      document.getElementById("edit-milestone-id").value = ms.id;
+      document.getElementById("ms-label").value = ms.label;
+      document.getElementById("ms-date").value = ms.date;
+      document.getElementById("ms-text").value = ms.text;
+      document.getElementById("milestone-modal").classList.remove("hidden");
+    }
+
+    function saveMilestone(e) {
+      e.preventDefault();
+      const id = document.getElementById("edit-milestone-id").value;
+      const label = document.getElementById("ms-label").value.trim();
+      const date = document.getElementById("ms-date").value;
+      const text = document.getElementById("ms-text").value.trim();
+
+      if (id) {
+        const ms = appState.milestones.find(m => m.id === id);
+        if (ms) {
+          ms.label = label;
+          ms.date = date;
+          ms.text = text;
+        }
+        showToast("Milestone updated");
+      } else {
+        appState.milestones.push({
+          id: "m_" + Date.now(),
+          label,
+          date,
+          text,
+          done: false
+        });
+        showToast("New milestone added");
+      }
+
+      persistState();
+      renderDashboard();
+      closeModals();
+    }
+
+    function deleteMilestone(id) {
+      appState.milestones = appState.milestones.filter(m => m.id !== id);
+      persistState();
+      renderDashboard();
+      showToast("Milestone removed");
+    }
+
+    function openSettingsModal() {
+      document.getElementById("cfg-title").value = appState.title;
+      document.getElementById("cfg-deadline").value = appState.deadlineUTC.slice(0, 16);
+      document.getElementById("settings-modal").classList.remove("hidden");
+    }
+
+    function saveMissionSettings(e) {
+      e.preventDefault();
+      const title = document.getElementById("cfg-title").value.trim();
+      const dtLocal = document.getElementById("cfg-deadline").value;
+      if (title) appState.title = title.toUpperCase();
+      if (dtLocal) appState.deadlineUTC = dtLocal + ":00Z";
+      persistState();
+      renderDashboard();
+      updateLiveTelemetry();
+      closeModals();
+      showToast("Mission configuration updated");
+    }
+
+    function resetToDefaults() {
+      appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+      persistState();
+      renderDashboard();
+      updateLiveTelemetry();
+      closeModals();
+      showToast("Reset to default Cloud Architecture Audit plan");
+    }
+
+    function closeModals() {
+      document.getElementById("milestone-modal").classList.add("hidden");
+      document.getElementById("settings-modal").classList.add("hidden");
+    }
+
+    /**
+     * Toggle Distraction-Free Lock Screen Mode
+     */
+    function toggleLockMode() {
+      const isLock = document.body.classList.toggle("lock-mode");
+      const exitBtn = document.getElementById("exit-lock-btn");
+      if (isLock) {
+        exitBtn.classList.remove("hidden");
+        showToast("Lock Screen Mode active — press ESC to exit");
+      } else {
+        exitBtn.classList.add("hidden");
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (document.body.classList.contains("lock-mode")) {
+          toggleLockMode();
+        }
+        closeModals();
+      }
+    });
+
+    /**
+     * Copy Shareable URL with Encoded Milestone State
+     */
+    function copyShareableURL() {
+      persistState();
+      const shareURL = window.location.href;
+      const tempInput = document.createElement("textarea");
+      tempInput.value = shareURL;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand("copy");
+        showToast("Shareable state URL copied to clipboard!");
+      } catch (err) {
+        showToast("Copy failed — copy the URL from your browser bar");
+      }
+      document.body.removeChild(tempInput);
+    }
+
+    /**
+     * Export Dynamic 1920x1080 16:9 Desktop Lock Screen PNG via HTML5 Canvas
+     * Draws ./background-img.jpg (or live previewed image) beneath the dark frosted card
+     */
+    function exportLockScreenPNG() {
+      const canvas = document.getElementById("export-canvas");
+      const ctx = canvas.getContext("2d");
+      const W = 1920;
+      const H = 1080;
+
+      const renderOverlayAndDownload = (bgImg) => {
+        ctx.clearRect(0, 0, W, H);
+
+        if (bgImg) {
+          // Cover-fit the weathered wood plank image across 1920x1080
+          const scale = Math.max(W / bgImg.width, H / bgImg.height);
+          const drawW = bgImg.width * scale;
+          const drawH = bgImg.height * scale;
+          const offsetX = (W - drawW) / 2;
+          const offsetY = (H - drawH) / 2;
+          ctx.drawImage(bgImg, offsetX, offsetY, drawW, drawH);
+        } else {
+          // Fallback procedural weathered plank pattern if ./background-img.jpg is missing
+          const plankColors = ["#d6d3d1", "#e7e5e4", "#a8a29e", "#d6d3d1", "#f5f5f4", "#78716c"];
+          const plankW = W / plankColors.length;
+          plankColors.forEach((col, i) => {
+            ctx.fillStyle = col;
+            ctx.fillRect(i * plankW, 0, plankW, H);
+            ctx.fillStyle = "rgba(68, 64, 60, 0.45)";
+            ctx.fillRect(i * plankW, 0, 4, H);
+          });
+        }
+
+        // Elevated Dark Frosted Charcoal Card (Leaving Top 220px Clean for Desktop Clock & Icons)
+        const cardX = 260;
+        const cardY = 220;
+        const cardW = W - 520;
+        const cardH = 815;
+        const radius = 28;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(cardX, cardY, cardW, cardH, radius);
+        ctx.fillStyle = "rgba(15, 18, 25, 0.88)";
+        ctx.shadowColor = "rgba(0, 0, 0, 0.72)";
+        ctx.shadowBlur = 48;
+        ctx.shadowOffsetY = 20;
+        ctx.fill();
+        ctx.restore();
+
+        // Amber Border
+        ctx.beginPath();
+        ctx.roundRect(cardX, cardY, cardW, cardH, radius);
+        ctx.strokeStyle = "#F59E0B";
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Card Header Typography
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#F59E0B";
+        ctx.font = "600 19px 'JetBrains Mono', monospace";
+        ctx.fillText("✦   T-MINUS COUNTDOWN   ✦", W / 2, cardY + 48);
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "800 42px 'Inter', sans-serif";
+        ctx.fillText(appState.title, W / 2, cardY + 98);
+
+        ctx.fillStyle = "#D6D3D1";
+        ctx.font = "500 17px 'JetBrains Mono', monospace";
+        ctx.fillText("08:00 UTC  |  08:00 GMT/BST  |  09:00 CET  |  00:00 PST  |  09:00 WAT", W / 2, cardY + 132);
+
+        // Divider Line
+        ctx.beginPath();
+        ctx.moveTo(cardX + 60, cardY + 156);
+        ctx.lineTo(cardX + cardW - 60, cardY + 156);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Render Milestones with Live Checkboxes (Auto-scaled for 11+ items)
+        const count = Math.max(1, appState.milestones.length);
+        const startY = cardY + 200;
+        const availableH = cardH - 255;
+        const rowSpacing = Math.min(56, Math.floor(availableH / count));
+        const fontSize = count > 9 ? 19 : 22;
+        const boxSize = count > 9 ? 22 : 26;
+
+        appState.milestones.forEach((ms, idx) => {
+          const y = startY + idx * rowSpacing;
+          const boxX = cardX + 85;
+          const boxY = y - (boxSize - 5);
+
+          // Checkbox Square
+          ctx.beginPath();
+          ctx.roundRect(boxX, boxY, boxSize, boxSize, 6);
+          if (ms.done) {
+            ctx.fillStyle = "#F59E0B";
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(boxX + 5, boxY + boxSize * 0.52);
+            ctx.lineTo(boxX + boxSize * 0.42, boxY + boxSize * 0.74);
+            ctx.lineTo(boxX + boxSize - 5, boxY + boxSize * 0.28);
+            ctx.strokeStyle = "#14161A";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+          } else {
+            ctx.fillStyle = "#14161A";
+            ctx.fill();
+            ctx.strokeStyle = "#F59E0B";
+            ctx.lineWidth = 2.2;
+            ctx.stroke();
+          }
+
+          // Milestone Text Alignment
+          ctx.textAlign = "left";
+          const dateFormatted = formatExecDate(ms.date).replace(", 2026", "");
+          const prefix = `${ms.label} (${dateFormatted}):`;
+
+          ctx.font = `700 ${fontSize}px 'JetBrains Mono', monospace`;
+          ctx.fillStyle = ms.done ? "#A8A29E" : "#FBBF24";
+          ctx.fillText(prefix, boxX + boxSize + 18, y);
+
+          const prefixWidth = ctx.measureText(prefix).width;
+          ctx.font = `500 ${fontSize}px 'Inter', sans-serif`;
+          ctx.fillStyle = ms.done ? "#78716C" : "#F8FAFC";
+          const textStartX = boxX + boxSize + 18 + prefixWidth + 14;
+          ctx.fillText(ms.text, textStartX, y);
+
+          if (ms.done) {
+            const textWidth = ctx.measureText(ms.text).width;
+            ctx.beginPath();
+            ctx.moveTo(textStartX, y - 6);
+            ctx.lineTo(textStartX + textWidth, y - 6);
+            ctx.strokeStyle = "#78716C";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+        });
+
+        // Subtle Footer Watermark inside Exported PNG
+        ctx.textAlign = "center";
+        ctx.fillStyle = "rgba(214, 211, 209, 0.75)";
+        ctx.font = "500 15px 'JetBrains Mono', monospace";
+        ctx.fillText("© 2026 Samuel Peter™ • Cloud Architecture Audit Countdown • cloud-architecture-audit-app.vercel.app", W / 2, cardY + cardH - 22);
+
+        try {
+          const link = document.createElement("a");
+          link.download = `T-Minus-LockScreen-${appState.title.replace(/\s+/g, "-")}.png`;
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+          showToast("1920x1080 Lock Screen PNG exported!");
+        } catch (err) {
+          showToast("Export blocked by local file security — run on localhost or Vercel");
+        }
+      };
+
+      const img = new Image();
+      img.onload = () => renderOverlayAndDownload(img);
+      img.onerror = () => renderOverlayAndDownload(null);
+      img.src = customBgDataURL || "./background-img.jpg";
+    }
+
+    /**
+     * Download Standalone index.html with Current Custom Milestones & State Baked In
+     */
+    function downloadStandaloneHTML() {
+      const currentHTML = document.documentElement.outerHTML;
+      const serializedState = JSON.stringify(appState, null, 2);
+      const bakedHTML = "<!DOCTYPE html>\n" + currentHTML.replace(
+        /const DEFAULT_STATE = \{[\s\S]*?\n    \};/,
+        `const DEFAULT_STATE = ${serializedState};`
+      );
+      const blob = new Blob([bakedHTML], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "index.html";
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast("Downloaded index.html with your custom milestones baked in!");
+    }
+
+    /**
+     * Generate and Download Multi-Event .ics Calendar File (All 11 Milestones at 08:00 UTC)
+     */
+    function downloadICS() {
+      const nowStamp = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+      const lines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Samuel Peter//Cloud Architecture Audit Countdown//EN",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH"
+      ];
+
+      appState.milestones.forEach((ms) => {
+        const cleanDate = ms.date.replace(/-/g, "");
+        lines.push(
+          "BEGIN:VEVENT",
+          `UID:${ms.id}-${cleanDate}@cloud-architecture-audit-app.vercel.app`,
+          `DTSTAMP:${nowStamp}`,
+          `DTSTART:${cleanDate}T080000Z`,
+          `DTEND:${cleanDate}T083000Z`,
+          `SUMMARY:${ms.label}: ${ms.text}`,
+          `DESCRIPTION:${appState.title} Milestone (${ms.label}). Global Reference: 08:00 UTC | 08:00 GMT/BST (UK) | 09:00 CET (EU) | 00:00 PST (US) | 09:00 WAT.`,
+          "BEGIN:VALARM",
+          "TRIGGER:-PT0M",
+          "ACTION:DISPLAY",
+          `DESCRIPTION:${ms.label}: ${ms.text}`,
+          "END:VALARM",
+          "END:VEVENT"
+        );
+      });
+
+      lines.push("END:VCALENDAR");
+      const blob = new Blob([lines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "Cloud-Architecture-Audit-Milestones.ics";
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast("Downloaded 11-milestone .ics calendar file!");
+    }
+
+    /**
+     * Utility: Toast Banner & HTML Escaping
+     */
+    let toastTimer;
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      document.getElementById("toast-msg").textContent = msg;
+      toast.classList.remove("translate-y-24", "opacity-0");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add("translate-y-24", "opacity-0");
+      }, 3200);
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>"']/g, (m) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[m]);
+    }
+
+    // Initialize Application
+    renderDashboard();
+    updateLiveTelemetry();
+    setInterval(updateLiveTelemetry, 1000);
+  </script>
+
+</body></html>
